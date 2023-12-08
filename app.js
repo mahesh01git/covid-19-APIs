@@ -65,10 +65,10 @@ app.get("/states/:stateId/", (request, response) => {
     FROM 
     state
     WHERE 
-    state_id = ${stateId}
+        state_id = ${stateId}
     `;
-  const r = db.get(api2Q);
-  response.send(convertStateObj(r));
+  const result = db.get(api2Q);
+  response.send(convertStateObj(result));
 });
 
 ///API 3
@@ -104,7 +104,7 @@ app.get("/districts/:districtId/", async (request, response) => {
     district_id = ${districtId}
     `;
   const A = await db.get(api4Q);
-  response.send(convertDistObj(a));
+  response.send(convertDistObj(A));
 });
 
 /// API 5
@@ -129,7 +129,7 @@ app.put("/districts/:districtId/", async (request, response) => {
   const { districtName, stateId, cases, cured, active, deaths } = request.body;
 
   const api6Q = `
-    UPDATE * 
+    UPDATE 
     
     district 
     SET 
@@ -156,15 +156,15 @@ app.get("/states/:stateId/stats/", async (request, response) => {
      SUM(cases) AS totalCases,
      SUM(cured) AS totalCured,
      SUM(active) AS totalActive,
-     SUN(deaths) AS totalDeaths
+     SUM(deaths) AS totalDeaths
 
      FORM 
-     state
+     district
      WHERE 
      state_id = ${stateId}
      `;
-  const r = db.get(api7Q);
-  response.send(r);
+  const r1 = db.get(api7Q);
+  response.send(r1);
 });
 
 /// API 8
@@ -172,13 +172,16 @@ app.get("/states/:stateId/stats/", async (request, response) => {
 app.get("/districts/:districtId/details/", async (request, response) => {
   const { districtId } = request.params;
   const api8Q = `
-     SELECT state_name
+     SELECT state_name AS stateName
      FROM 
-     district
+     state JOIN district 
+     ON state.state_id = district.state_id
      WHERE 
-     district_id = ${districtId}
+     district.district_id = ${districtId}
      `;
-  const r = await db.get(api8Q);
-  response.send(convertDistObj(r));
+
+  const r = await get(api8Q);
+
+  response.send(r);
 });
 module.exports = app;
